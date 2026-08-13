@@ -255,6 +255,32 @@
 
     <hr>
 
+    <div>
+      <h2 style="margin-top: 8px;">Volumetric Blobs</h2>
+    </div>
+
+    <div class="field">
+      <label>Blobs Count <span class="mono" id="vBlobs">0</span></label>
+      <input type="range" id="blobs" min="0" max="10" value="0">
+    </div>
+
+    <div class="field">
+      <label>Drift Amount <span class="mono" id="vBlobDrift">1.0x</span></label>
+      <input type="range" id="blobDrift" min="0" max="30" value="10">
+    </div>
+
+    <div class="field">
+      <label>Deformation <span class="mono" id="vBlobDeformation">1.0x</span></label>
+      <input type="range" id="blobDeformation" min="1" max="30" value="10">
+    </div>
+
+    <div class="field">
+      <label>Chaos Level <span class="mono" id="vBlobChaos">1.0x</span></label>
+      <input type="range" id="blobChaos" min="0" max="30" value="10">
+    </div>
+
+    <hr>
+
     <div class="field">
       <label>Presets</label>
       <select id="preset">
@@ -347,6 +373,20 @@
       </div>
 
     </div>
+
+    <div style="margin-top: 24px;">
+      <!-- 7. ORGANIC BLOBS -->
+      <div class="card aurora aurora-hover" id="card-blobs" style="min-height: 250px;">
+        <div style="z-index:1; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center;">
+          <span class="tag" style="color:rgba(255,255,255,0.7); margin-bottom:8px;">.aurora + .aurora-hover + Blobs Config</span>
+          <h3 style="color:#fff; font-size: 24px; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">Organic Particle System</h3>
+          <p class="desc" style="color:rgba(255,255,255,0.9); font-weight:500;">
+            Use the <strong>Volumetric Blobs</strong> sliders in the sidebar to inject particles.<br>
+            Hover this card to orchestrate a smooth 700ms fade-in of the light.
+          </p>
+        </div>
+      </div>
+    </div>
   </main>
 
   <script type="module">
@@ -372,10 +412,14 @@
       pause: document.getElementById("pause"),
       pageBg: document.getElementById("pageBg"),
       preset: document.getElementById("preset"),
+      blobs: document.getElementById("blobs"),
+      blobDrift: document.getElementById("blobDrift"),
+      blobDeformation: document.getElementById("blobDeformation"),
+      blobChaos: document.getElementById("blobChaos"),
     };
 
     function refresh() {
-      applyAurora(root, {
+      const config = {
         colors: [
           { color: controls.c1.value },
           { color: controls.c2.value },
@@ -393,13 +437,28 @@
         noise: controls.noise.checked ? 0.15 : 0,
         state: controls.pause.checked ? "paused" : "running",
         direction: controls.direction.value,
-      });
+        blobs: parseInt(controls.blobs.value),
+        blobDrift: controls.blobDrift.value / 10,
+        blobDeformation: controls.blobDeformation.value / 10,
+        blobChaos: controls.blobChaos.value / 10,
+      };
+
+      // Set custom properties globally on root, but do NOT inject DOM blobs into the background.
+      applyAurora(root, { ...config, blobs: 0 });
+
+      // Inject DOM blobs only into valid container cards (not root, not text)
+      const elements = document.querySelectorAll(".aurora:not(.aurora-text), .aurora-border");
+      elements.forEach(el => applyAurora(el, config));
 
       // Update value displays
       document.getElementById("vDuration").textContent = `${controls.duration.value}s`;
       document.getElementById("vBlur").textContent = `${controls.blur.value}px`;
       document.getElementById("vOpacity").textContent = (controls.opacity.value / 100).toFixed(2);
       document.getElementById("vWaveWidth").textContent = `${controls.waveWidth.value}vw`;
+      document.getElementById("vBlobs").textContent = controls.blobs.value;
+      document.getElementById("vBlobDrift").textContent = (controls.blobDrift.value / 10).toFixed(1) + "x";
+      document.getElementById("vBlobDeformation").textContent = (controls.blobDeformation.value / 10).toFixed(1) + "x";
+      document.getElementById("vBlobChaos").textContent = (controls.blobChaos.value / 10).toFixed(1) + "x";
 
       // Full-page background toggle
       document.body.classList.toggle("has-page-bg", controls.pageBg.checked);

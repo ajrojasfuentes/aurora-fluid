@@ -5,6 +5,45 @@ All notable changes to Aurora Fluid are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] — 2026-08-13
+
+### Added
+
+- **Organic particle system (blobs):** `.aurora-blobs` container and `.aurora-blob` base class for volumetric floating particles
+- `blobs` config option — number of particles to inject (0–10)
+- `blobDrift` config option — spatial movement multiplier
+- `blobDeformation` config option — morphing speed multiplier
+- `blobChaos` config option — temporal desynchronization multiplier
+- `--af-drift` custom property for per-blob drift amplitude
+- 3 drift keyframes (`aurora-drift-1`, `aurora-drift-2`, `aurora-drift-3`) with parametric `translate()` + `scale()`
+- 3 morph keyframes (`aurora-morph-1`, `aurora-morph-2`, `aurora-morph-3`) using 8-point `border-radius` deformation
+- Mask support for blobs inside `.aurora-mask` and `.aurora-border` containers
+- `.aurora-hover` modifier — starts `--af-intensity` at 0 and transitions to 1 on `:hover` over 700 ms
+- `@property --af-intensity` registration for smooth CSS transitions of computed values
+- Deterministic PRNG (`mulberry32`) for stable blob positioning across configuration updates
+- `build.js` build script using esbuild for minification
+- `aurora.min.css` and `aurora.min.js` minified production assets
+- `npm run build` script in `package.json`
+- Blobs Count, Drift Amount, Deformation, and Chaos Level sliders in the demo sidebar
+- "Organic Particle System" demo card with `.aurora-hover` orchestration
+- `esbuild` as a dev dependency
+
+### Changed
+
+- Version bumped to `1.1.0`
+- `filter: blur()` on blobs consolidated from per-particle (N GPU operations) to per-container (1 GPU operation)
+- `will-change` declarations moved from permanent inline to conditional `@media not (prefers-reduced-motion: reduce)` block
+- `contain: strict` added to `.aurora-blobs` for aggressive repaint isolation
+- Blob duration arrays (`DRIFT_DURATIONS`, `MORPH_DURATIONS`) promoted to module-level constants
+- Blob DOM nodes are now reused across `applyAurora()` calls instead of being destroyed and recreated
+- Demo `refresh()` function now applies custom properties globally on `:root` (without blobs) and applies the full config (with blobs) only to valid container elements
+- `prefers-reduced-motion` media query now includes `.aurora-blob` selector
+- `package.json` `files` array now includes minified assets
+
+### Fixed
+
+- `.aurora-hover` elements were always visible because `applyAurora()` wrote `--af-intensity: 1` as an inline style, which has higher specificity than the class-level `--af-intensity: 0` declaration. `applyAurora()` now skips writing `--af-intensity` inline when the target element has the `.aurora-hover` class.
+
 ## [1.0.0] — 2026-08-12
 
 ### Breaking Changes

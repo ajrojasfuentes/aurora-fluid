@@ -38,6 +38,14 @@ export interface AuroraConfig {
   direction?: "x" | "y";
   /** Global effect multiplier (0-1). @default 1 */
   intensity?: number;
+  /** Number of volumetric blobs to inject. @default 0 */
+  blobs?: number;
+  /** Deformation multiplier for blobs morphing. @default 1 */
+  blobDeformation?: number;
+  /** Spatial movement multiplier for blobs drifting. @default 1 */
+  blobDrift?: number;
+  /** Chaos multiplier for asynchronous delays. @default 1 */
+  blobChaos?: number;
 }
 
 /**

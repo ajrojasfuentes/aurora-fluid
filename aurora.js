@@ -47,6 +47,27 @@ function resolveColor(c) {
 }
 
 /**
+ * OPT-3: Deterministic PRNG (mulberry32) — produces the same
+ * sequence given the same seed, so blob positions are stable
+ * across refresh() calls when only unrelated params change.
+ * @param {number} seed
+ * @returns {() => number} A function returning 0-1
+ */
+function mulberry32(seed) {
+  return function () {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// OPT-4: Module-level constants — prime-ish durations to prevent visual looping
+const DRIFT_DURATIONS = [30, 34, 27, 36, 31, 35, 29, 37, 23, 41];
+const MORPH_DURATIONS = [22, 25, 20, 26, 28, 19, 23, 31, 17, 29];
+
+/**
  * Builds the linear-gradient CSS string from a color list.
  * Closes the cycle by repeating the first color at 100% so that
  * the `repeat-x` animation tiles seamlessly (no visible seam).
@@ -107,6 +128,10 @@ export function applyAurora(el, config) {
     delay = "0s",
     direction = "x",
     intensity = 1,
+    blobs = 0,
+    blobDeformation = 1,
+    blobDrift = 1,
+    blobChaos = 1,
   } = config;
 
   if (angle === undefined) {
@@ -124,7 +149,12 @@ export function applyAurora(el, config) {
   el.style.setProperty("--af-noise", String(noise));
   el.style.setProperty("--af-state", state);
   el.style.setProperty("--af-delay", delay);
-  el.style.setProperty("--af-intensity", String(intensity));
+
+  // BUG FIX: Skip inline intensity on hover-controlled elements
+  // so the CSS :hover rule can drive --af-intensity via the cascade.
+  if (!el.classList.contains("aurora-hover")) {
+    el.style.setProperty("--af-intensity", String(intensity));
+  }
 
   // Direction: set internal computed properties that the CSS reads
   if (direction === "y") {
@@ -142,6 +172,85 @@ export function applyAurora(el, config) {
     el.style.setProperty("--_af-noise-bg", buildNoiseBg(noiseFreq, noiseOctaves));
   } else {
     el.style.removeProperty("--_af-noise-bg");
+  }
+
+  // Blobs Generation (OPT-2: reuse existing DOM nodes)
+  if (blobs > 0) {
+    let blobsWrapper = el.querySelector(".aurora-blobs");
+    if (!blobsWrapper) {
+      blobsWrapper = document.createElement("div");
+      blobsWrapper.className = "aurora-blobs";
+      el.appendChild(blobsWrapper);
+    }
+
+    const existing = blobsWrapper.children;
+
+    // Remove excess blobs
+    while (existing.length > blobs) {
+      blobsWrapper.removeChild(existing[existing.length - 1]);
+    }
+
+    for (let i = 0; i < blobs; i++) {
+      // OPT-3: Deterministic random per blob index
+      const rng = mulberry32(i * 2654435761); // golden-ratio hash spread
+
+      let blob = existing[i];
+      const isNew = !blob;
+
+      if (isNew) {
+        blob = document.createElement("div");
+        blob.className = "aurora-blob";
+        blob.dataset.afSeed = String(i);
+      }
+
+      // Only reposition if this is a freshly created blob
+      if (isNew) {
+        // Select core color (wrap around if more blobs than colors)
+        const cStop = colors[i % colors.length];
+        const coreColor = resolveColor(cStop);
+        const cx = 35 + rng() * 30;
+        const cy = 35 + rng() * 30;
+        blob.style.background = `radial-gradient(circle at ${cx}% ${cy}%, ${coreColor}, transparent 70%)`;
+
+        // Deterministic size between 35% and 65%
+        const size = 35 + rng() * 30;
+        blob.style.width = `${size}%`;
+        blob.style.height = `${size}%`;
+
+        // Deterministic spread across the container
+        blob.style.top = `${-10 + rng() * 60}%`;
+        blob.style.left = `${-10 + rng() * 60}%`;
+
+        // Select animations
+        const driftId = (i % 3) + 1;
+        const morphId = ((i + 1) % 3) + 1;
+
+        const dDur = DRIFT_DURATIONS[i % DRIFT_DURATIONS.length];
+        const mDur = MORPH_DURATIONS[i % MORPH_DURATIONS.length] / Math.max(0.1, blobDeformation);
+
+        // Chaos offsets (deterministic)
+        const driftDelay = -(rng() * 30 * blobChaos);
+        const morphDelay = -(rng() * 30 * blobChaos);
+
+        blob.style.animation = `
+          aurora-drift-${driftId} ${dDur}s ease-in-out infinite ${i % 2 === 0 ? "alternate" : "alternate-reverse"},
+          aurora-morph-${morphId} ${mDur}s ease-in-out infinite alternate
+        `;
+        blob.style.animationDelay = `${driftDelay}s, ${morphDelay}s`;
+      }
+
+      // Always update these (they depend on live slider values)
+      blob.style.animationPlayState = state;
+      blob.style.setProperty("--af-drift", String(blobDrift));
+
+      if (isNew) {
+        blobsWrapper.appendChild(blob);
+      }
+    }
+  } else {
+    // Remove blobs wrapper if it exists and blobs = 0
+    const existing = el.querySelector(".aurora-blobs");
+    if (existing) existing.remove();
   }
 }
 
