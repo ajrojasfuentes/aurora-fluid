@@ -46,6 +46,8 @@ export interface AuroraConfig {
   blobDrift?: number;
   /** Chaos multiplier for asynchronous delays. @default 1 */
   blobChaos?: number;
+  /** Scale multiplier for volumetric blobs. @default 1 */
+  blobSize?: number;
 }
 
 /**
@@ -76,8 +78,8 @@ export declare function applyAuroraAll(
 ): void;
 
 /**
- * Removes all --af-* custom properties from an element,
- * reverting to :root defaults.
+ * Removes all --af-* custom properties from an element
+ * and removes injected blobs, reverting to :root defaults.
  */
 export declare function removeAurora(el: HTMLElement): void;
 

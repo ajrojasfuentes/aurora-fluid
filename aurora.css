@@ -253,6 +253,8 @@
   filter: blur(calc(var(--af-blur) * 0.75 * var(--af-intensity)));
   /* OPT-6: Strict containment — nothing inside can affect outside layout */
   contain: strict;
+  /* Auto-scaling: establishes a container for cqmax units on blobs */
+  container-type: size;
 }
 
 /* Mask support for shapes */
@@ -280,6 +282,7 @@
 /* Individual particle base physics */
 .aurora-blob {
   position: absolute;
+  aspect-ratio: 1 / 1; /* Forces perfect spheres regardless of container shape */
   border-radius: 50%;
   mix-blend-mode: var(--af-blend);
   opacity: calc(var(--af-opacity) * var(--af-intensity));

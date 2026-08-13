@@ -135,6 +135,7 @@ Override these on `:root` (global), on a class, or inline on any element.
 | Property | Default | Description |
 |---|---|---|
 | `--af-drift` | `1` | Spatial movement multiplier for blob drifting |
+| `--af-blob-size` | `1` | Scale multiplier for volumetric blobs |
 
 > **Note:** `--af-intensity` is registered via `@property` for smooth CSS transitions. When using `.aurora-hover`, the property transitions from `0` to `1` over 700 ms.
 
@@ -211,6 +212,7 @@ applyAurora(document.querySelector('.my-element'), {
   blobDrift: 1.5,        // Movement range multiplier
   blobDeformation: 1.2,  // Morphing speed multiplier
   blobChaos: 2,          // Temporal desynchronization multiplier
+  blobSize: 1.5,         // Scale multiplier
 });
 ```
 
@@ -321,6 +323,7 @@ applyAurora(el, PRESETS.ocean);
   blobDrift: 1,               // Movement range multiplier
   blobDeformation: 1,         // Morphing speed multiplier
   blobChaos: 1,               // Temporal desynchronization multiplier
+  blobSize: 1,                // Scale multiplier for volumetric blobs
 }
 ```
 

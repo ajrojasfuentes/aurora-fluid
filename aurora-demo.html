@@ -142,7 +142,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      height: 140px;
+      min-height: 140px;
     }
     .shape-demo .aurora { width: 140px; height: 140px; }
 
@@ -279,6 +279,11 @@
       <input type="range" id="blobChaos" min="0" max="30" value="10">
     </div>
 
+    <div class="field">
+      <label>Blob Size <span class="mono" id="vBlobSize">1.0x</span></label>
+      <input type="range" id="blobSize" min="1" max="50" value="10">
+    </div>
+
     <hr>
 
     <div class="field">
@@ -315,11 +320,19 @@
       <!-- 2. SIMPLE SHAPE -->
       <div class="card" id="card-shape">
         <div>
-          <span class="tag">.aurora (Circle)</span>
-          <h3>Simple Shape</h3>
+          <span class="tag">.aurora (Shapes)</span>
+          <h3>Simple Shapes</h3>
         </div>
-        <div class="shape-demo">
-          <div class="aurora" style="width:140px; height:140px; border-radius:50%;"></div>
+        <div class="shape-demo" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; align-items: center; padding: 15px 0;">
+          <!-- 3 Medianas -->
+          <div class="aurora" style="width:60px; height:60px; border-radius:50%; flex-shrink:0;"></div>
+          <div class="aurora" style="width:60px; height:60px; border-radius:12px; flex-shrink:0;"></div>
+          <div class="aurora" style="width:60px; height:60px; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); flex-shrink:0;"></div>
+          
+          <!-- 3 Pequeñas -->
+          <div class="aurora" style="width:20px; height:20px; border-radius:50%; flex-shrink:0;"></div>
+          <div class="aurora" style="width:20px; height:20px; border-radius:4px; flex-shrink:0;"></div>
+          <div class="aurora" style="width:10px; height:10px; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); flex-shrink:0;"></div>
         </div>
       </div>
 
@@ -416,6 +429,7 @@
       blobDrift: document.getElementById("blobDrift"),
       blobDeformation: document.getElementById("blobDeformation"),
       blobChaos: document.getElementById("blobChaos"),
+      blobSize: document.getElementById("blobSize"),
     };
 
     function refresh() {
@@ -441,6 +455,7 @@
         blobDrift: controls.blobDrift.value / 10,
         blobDeformation: controls.blobDeformation.value / 10,
         blobChaos: controls.blobChaos.value / 10,
+        blobSize: controls.blobSize.value / 10,
       };
 
       // Set custom properties globally on root, but do NOT inject DOM blobs into the background.
@@ -459,6 +474,7 @@
       document.getElementById("vBlobDrift").textContent = (controls.blobDrift.value / 10).toFixed(1) + "x";
       document.getElementById("vBlobDeformation").textContent = (controls.blobDeformation.value / 10).toFixed(1) + "x";
       document.getElementById("vBlobChaos").textContent = (controls.blobChaos.value / 10).toFixed(1) + "x";
+      document.getElementById("vBlobSize").textContent = (controls.blobSize.value / 10).toFixed(1) + "x";
 
       // Full-page background toggle
       document.body.classList.toggle("has-page-bg", controls.pageBg.checked);

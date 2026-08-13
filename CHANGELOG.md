@@ -5,6 +5,16 @@ All notable changes to Aurora Fluid are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] — 2026-08-13
+
+### Added
+- Documented `blobSize` (and `--af-blob-size`) configuration in `README.md`.
+- Added missing blob configuration properties to the JSDoc in `aurora.js`.
+
+### Fixed
+- `removeAurora()` now correctly removes injected `.aurora-blobs` elements from the DOM, preventing orphaned HTML elements and memory leaks.
+- Updated `removeAurora` description in `aurora.d.ts` to reflect the blob removal behavior.
+
 ## [1.1.0] — 2026-08-13
 
 ### Added

@@ -32,6 +32,11 @@
  * @property {string}  [delay="0s"]           - Animation delay (for staggering)
  * @property {string}  [direction="x"]        - "x" | "y" — animation axis
  * @property {number}  [intensity=1]          - Global effect multiplier (0-1)
+ * @property {number}  [blobs=0]              - Number of volumetric blobs to inject (0-10)
+ * @property {number}  [blobDeformation=1]    - Morphing speed multiplier
+ * @property {number}  [blobDrift=1]          - Spatial movement multiplier
+ * @property {number}  [blobChaos=1]          - Temporal desynchronization multiplier
+ * @property {number}  [blobSize=1]           - Scale multiplier for volumetric blobs
  */
 
 /**
@@ -132,6 +137,7 @@ export function applyAurora(el, config) {
     blobDeformation = 1,
     blobDrift = 1,
     blobChaos = 1,
+    blobSize = 1,
   } = config;
 
   if (angle === undefined) {
@@ -212,10 +218,10 @@ export function applyAurora(el, config) {
         const cy = 35 + rng() * 30;
         blob.style.background = `radial-gradient(circle at ${cx}% ${cy}%, ${coreColor}, transparent 70%)`;
 
-        // Deterministic size between 35% and 65%
+        // Deterministic size between 35 and 65 (scaled by cqmax)
         const size = 35 + rng() * 30;
-        blob.style.width = `${size}%`;
-        blob.style.height = `${size}%`;
+        blob.style.width = `calc(${size}cqmax * var(--af-blob-size, 1))`;
+        // aspect-ratio: 1/1 in CSS automatically handles height
 
         // Deterministic spread across the container
         blob.style.top = `${-10 + rng() * 60}%`;
@@ -242,6 +248,7 @@ export function applyAurora(el, config) {
       // Always update these (they depend on live slider values)
       blob.style.animationPlayState = state;
       blob.style.setProperty("--af-drift", String(blobDrift));
+      blob.style.setProperty("--af-blob-size", String(blobSize));
 
       if (isNew) {
         blobsWrapper.appendChild(blob);
@@ -269,7 +276,7 @@ export function applyAuroraAll(target, config) {
 /**
  * Removes all --af-* custom properties from an element,
  * reverting it to the :root defaults. Also removes the
- * direction modifier class if present.
+ * direction modifier class and any injected blobs.
  * @param {HTMLElement} el
  */
 export function removeAurora(el) {
@@ -281,6 +288,9 @@ export function removeAurora(el) {
   ];
   props.forEach((prop) => el.style.removeProperty(prop));
   el.classList.remove("aurora-flow-y");
+
+  const existingBlobs = el.querySelector(".aurora-blobs");
+  if (existingBlobs) existingBlobs.remove();
 }
 
 /**
