@@ -1,0 +1,24 @@
+{
+  "name": "aurora-fluid",
+  "version": "1.0.0",
+  "description": "Reusable animated gradient flow engine — CSS custom properties + optional JS helper",
+  "type": "module",
+  "main": "aurora.js",
+  "types": "aurora.d.ts",
+  "files": [
+    "aurora.css",
+    "aurora.js",
+    "aurora.d.ts"
+  ],
+  "keywords": [
+    "css",
+    "gradient",
+    "animation",
+    "aurora",
+    "fluid",
+    "design-system",
+    "custom-properties",
+    "animated-gradient"
+  ],
+  "license": "MIT"
+}
